@@ -8,22 +8,59 @@ print(DFS_LOGIN)
 DFS_KEY = os.getenv('DFS_KEY')
 print(DFS_KEY)
 
-# client = RestClient(DFS_LOGIN, DFS_KEY)
-# post_data = dict()
-# # simple way to set a task
-# post_data[len(post_data)] = dict(
-#     keywords=[
-#         "data analyst",
-#         "analytics engineer"
-#     ],
-#     location_name="Germany",
-#     language_name="Geman"
-# )
-# # POST /v3/dataforseo_labs/google/historical_search_volume/live
-# response = client.post("/v3/dataforseo_labs/google/historical_search_volume/live", post_data)
-# # you can find the full list of the response codes here https://docs.dataforseo.com/v3/appendix/errors
-# if response["status_code"] == 20000:
-#     print(response)
-#     # do something with result
-# else:
-#     print("error. Code: %d Message: %s" % (response["status_code"], response["status_message"]))
+def fetch_and_extract_search_volume(client, login, key, keywords, location, language):
+    """
+    Fetches historical search volume data from DataForSEO API and extracts results in JSON format.
+
+    Args:
+        client (RestClient): Initialized RestClient instance for API communication.
+        login (str): DataForSEO API login.
+        key (str): DataForSEO API key.
+        keywords (list): List of keywords to fetch data for.
+        location (str): Location name (e.g., "Germany").
+        language (str): Language name (e.g., "German").
+
+    Returns:
+        dict: Extracted search volume results or error response.
+    """
+    # Initialize client with credentials
+    client = RestClient(login, key)
+    
+    # Prepare POST data
+    post_data = {
+        len(post_data): {
+            "keywords": keywords,
+            "location_name": location,
+            "language_name": language
+        }
+    }
+    
+    # Make POST request
+    response = client.post("/v3/dataforseo_labs/google/historical_search_volume/live", post_data)
+
+    # Check response status
+    if response.get("status_code") == 20000:
+        # Extract search volume data
+        results = []
+        for task in response.get("tasks", []):
+            for result in task.get("result", []):
+                for item in result.get("items", []):
+                    keyword = item.get("keyword")
+                    monthly_searches = item["keyword_info"].get("monthly_searches", [])
+                    for monthly in monthly_searches:
+                        results.append({
+                            "keyword": keyword,
+                            "year": monthly["year"],
+                            "month": monthly["month"],
+                            "search_volume": monthly["search_volume"]
+                        })
+        return {"status": "success", "data": results}
+    else:
+        # Return error response
+        return {
+            "status": "error",
+            "code": response.get("status_code"),
+            "message": response.get("status_message")
+        }
+    
+
