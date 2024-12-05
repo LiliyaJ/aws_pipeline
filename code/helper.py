@@ -64,3 +64,27 @@ def fetch_and_extract_search_volume(client, login, key, keywords, location, lang
         }
     
 
+def extract_search_volume_to_json(json_data):
+    """
+    Extracts search volume data from the provided JSON object and formats it as a JSON structure.
+
+    Args:
+        json_data (dict): The JSON object containing search volume data.
+
+    Returns:
+        list: A list of dictionaries with extracted search volume data.
+    """
+    results = []
+    for task in json_data.get("tasks", []):
+        for result in task.get("result", []):
+            for item in result.get("items", []):
+                keyword = item.get("keyword")
+                monthly_searches = item["keyword_info"].get("monthly_searches", [])
+                for monthly in monthly_searches:
+                    results.append({
+                        "keyword": keyword,
+                        "year": monthly["year"],
+                        "month": monthly["month"],
+                        "search_volume": monthly["search_volume"]
+                    })
+    return results
