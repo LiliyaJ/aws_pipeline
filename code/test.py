@@ -1,8 +1,9 @@
 import pandas as pd
-
+import os
+import requests
 
 #read the testfile
-data = pd.read_csv('data/online_retail.csv', sep = ',')
+data = pd.read_csv('data/online_retail.csv', sep = ',', encoding='ISO-8859-1')
 
 for i in data.index:
     try:
