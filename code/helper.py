@@ -88,3 +88,32 @@ def extract_search_volume_to_json(json_data):
                         "search_volume": monthly["search_volume"]
                     })
     return results
+
+def extract_search_volume(json_data):
+    """
+    Extracts search volume data from the provided JSON object.
+
+    Args:
+        json_data (dict): The JSON object containing search volume data.
+
+    Returns:
+        pd.DataFrame: A DataFrame with columns for Keyword, Year, Month, and Monthly Search Volume.
+    """
+    results = []
+    for task in json_data.get("tasks", []):
+        for result in task.get("result", []):
+            for item in result.get("items", []):
+                keyword = item.get("keyword")
+                search_volume = item["keyword_info"].get("search_volume")
+                monthly_searches = item["keyword_info"].get("monthly_searches", [])
+                for monthly in monthly_searches:
+                    results.append(
+                        {
+                            "Keyword": keyword,
+                            "Year": monthly["year"],
+                            "Month": monthly["month"],
+                            "Monthly Search Volume": monthly["search_volume"],
+                        }
+                    )
+                    
+    return pd.DataFrame(results)
