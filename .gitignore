@@ -3,5 +3,5 @@
 .venv
 .ipynb
 .vscode
-__pycache__
-tests
+code/__pycache__/
+tests/
