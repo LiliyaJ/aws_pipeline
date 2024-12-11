@@ -51,9 +51,9 @@ if __name__ == "__main__":
     event = {
         "keywords": ["data analyst", "analytics engineer", "data engineer"],
         "locations_languages": {
-            "Germany": "German",
-            "Switzerland": "German",
-            "United States": "English"
+             "United Kingdom": "English",
+            "Finland": "Finnish",
+            "Denmark": "Danish"
         },
         "dfs_login": DFS_LOGIN,
         "dfs_key": DFS_KEY
