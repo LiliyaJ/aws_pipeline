@@ -1,6 +1,8 @@
 import json
 import os
 import boto3
+import uuid
+from datetime import datetime
 from helper import fetch_historical_search_volume
 
 DFS_LOGIN = os.getenv('DFS_LOGIN')
@@ -23,9 +25,12 @@ def lambda_handler(event, context=None):
         # Fetch data using helper function
         combined_responses = fetch_historical_search_volume(keywords, locations_languages, dfs_login, dfs_key)
 
-        # Save to S3 bucket
-        bucket_name = "keywords-json-data"  # Ensure this bucket exists
-        s3_key = "historical_search_volume.json"
+        # Save each response into a separate JSON file in S3
+        bucket_name = "us-keywords-json-data"  # Ensure this bucket exists
+        unique_id = str(uuid.uuid4())  # Generate a unique identifier
+        current_date = datetime.now().strftime("%Y-%m-%d")  # Get current date
+        s3_key = f"historical_search_volume_{current_date}_{unique_id}.json"  # Unique file name
+
         s3_client.put_object(
             Bucket=bucket_name,
             Key=s3_key,
@@ -33,8 +38,8 @@ def lambda_handler(event, context=None):
             ContentType="application/json"
         )
 
-        print("Data successfully saved to S3.")
-        return {"status": "success", "message": "Data saved to S3"}
+        print(f"Data successfully saved to S3 as {s3_key}.")
+        return {"status": "success", "message": f"Data saved to S3 as {s3_key}"}
 
     except Exception as e:
         print(f"Error: {str(e)}")
