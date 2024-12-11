@@ -1,119 +1,40 @@
-import pandas as pd
-import json
-import os
 from client import RestClient
 
-DFS_LOGIN = os.getenv('DFS_LOGIN')
-print(DFS_LOGIN)
-DFS_KEY = os.getenv('DFS_KEY')
-print(DFS_KEY)
-
-def fetch_and_extract_search_volume(client, login, key, keywords, location, language):
+def fetch_historical_search_volume(keywords, locations_languages, dfs_login, dfs_key):
     """
-    Fetches historical search volume data from DataForSEO API and extracts results in JSON format.
+    Fetch historical search volume using DataForSEO API.
 
-    Args:
-        client (RestClient): Initialized RestClient instance for API communication.
-        login (str): DataForSEO API login.
-        key (str): DataForSEO API key.
-        keywords (list): List of keywords to fetch data for.
-        location (str): Location name (e.g., "Germany").
-        language (str): Language name (e.g., "German").
+    Parameters:
+        keywords (list): List of keywords to search.
+        locations_languages (dict): Dictionary mapping locations to language names.
+        dfs_login (str): DataForSEO API login.
+        dfs_key (str): DataForSEO API key.
 
     Returns:
-        dict: Extracted search volume results or error response.
+        dict: Combined responses from DataForSEO API.
     """
-    # Initialize client with credentials
-    client = RestClient(login, key)
-    
-    # Prepare POST data
-    post_data = {
-        len(post_data): {
-            "keywords": keywords,
-            "location_name": location,
-            "language_name": language
-        }
-    }
-    
-    # Make POST request
-    response = client.post("/v3/dataforseo_labs/google/historical_search_volume/live", post_data)
+    client = RestClient(dfs_login, dfs_key)
+    combined_responses = []
 
-    # Check response status
-    if response.get("status_code") == 20000:
-        # Extract search volume data
-        results = []
-        for task in response.get("tasks", []):
-            for result in task.get("result", []):
-                for item in result.get("items", []):
-                    keyword = item.get("keyword")
-                    monthly_searches = item["keyword_info"].get("monthly_searches", [])
-                    for monthly in monthly_searches:
-                        results.append({
-                            "keyword": keyword,
-                            "year": monthly["year"],
-                            "month": monthly["month"],
-                            "search_volume": monthly["search_volume"]
-                        })
-        return {"status": "success", "data": results}
-    else:
-        # Return error response
-        return {
-            "status": "error",
-            "code": response.get("status_code"),
-            "message": response.get("status_message")
-        }
-    
+    for location, language in locations_languages.items():
+        post_data = dict()
 
-def extract_search_volume_to_json(json_data):
-    """
-    Extracts search volume data from the provided JSON object and formats it as a JSON structure.
+        # Adding task to post_data
+        post_data[len(post_data)] = dict(
+            keywords=keywords,
+            location_name=location,
+            language_name=language  # Dynamically set the language based on location
+        )
 
-    Args:
-        json_data (dict): The JSON object containing search volume data.
+        # POST /v3/dataforseo_labs/google/historical_search_volume/live
+        response = client.post("/v3/dataforseo_labs/google/historical_search_volume/live", post_data)
 
-    Returns:
-        list: A list of dictionaries with extracted search volume data.
-    """
-    results = []
-    for task in json_data.get("tasks", []):
-        for result in task.get("result", []):
-            for item in result.get("items", []):
-                keyword = item.get("keyword")
-                monthly_searches = item["keyword_info"].get("monthly_searches", [])
-                for monthly in monthly_searches:
-                    results.append({
-                        "keyword": keyword,
-                        "year": monthly["year"],
-                        "month": monthly["month"],
-                        "search_volume": monthly["search_volume"]
-                    })
-    return results
+        if response["status_code"] == 20000:
+            print(f"Success for location: {location}")
+            combined_responses.append(response)
+        else:
+            error_message = f"Error for location {location}. Code: {response['status_code']} Message: {response['status_message']}"
+            print(error_message)
+            combined_responses.append({"error": error_message})
 
-def extract_search_volume(json_data):
-    """
-    Extracts search volume data from the provided JSON object.
-
-    Args:
-        json_data (dict): The JSON object containing search volume data.
-
-    Returns:
-        pd.DataFrame: A DataFrame with columns for Keyword, Year, Month, and Monthly Search Volume.
-    """
-    results = []
-    for task in json_data.get("tasks", []):
-        for result in task.get("result", []):
-            for item in result.get("items", []):
-                keyword = item.get("keyword")
-                search_volume = item["keyword_info"].get("search_volume")
-                monthly_searches = item["keyword_info"].get("monthly_searches", [])
-                for monthly in monthly_searches:
-                    results.append(
-                        {
-                            "Keyword": keyword,
-                            "Year": monthly["year"],
-                            "Month": monthly["month"],
-                            "Monthly Search Volume": monthly["search_volume"],
-                        }
-                    )
-                    
-    return pd.DataFrame(results)
+    return combined_responses
