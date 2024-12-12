@@ -2,6 +2,9 @@ import json
 import boto3
 import psycopg2
 from datetime import datetime
+from sqlalchemy import create_engine
+from transformation_helper import transform_tasks_data, transform_keyword_info, transform_monthly_search_volume, transform_impressions_data
+
 
 def load_data_from_s3(bucket_name, file_key):
     """ Load raw data from S3 bucket """
@@ -11,31 +14,24 @@ def load_data_from_s3(bucket_name, file_key):
 
 def process_data(data):
     """ Process data using the transformation functions """
-    from transform_functions import transform_impressions_data, transform_monthly_search_volume
     
     # Apply transformation functions
+    transformed_tasks_data = transform_tasks_data(data)
+    transformed_keyword_info = transform_keyword_info(data)   
     transformed_impressions_data = transform_impressions_data(data)
     transformed_monthly_search_volume = transform_monthly_search_volume(data)
 
-    return transformed_impressions_data, transformed_monthly_search_volume
+    return transformed_tasks_data, transformed_keyword_info, transformed_impressions_data, transformed_monthly_search_volume
 
-def write_to_redshift(data, redshift_table, redshift_connection):
-    """ Write transformed data into Redshift """
-    conn = psycopg2.connect(redshift_connection)
-    cursor = conn.cursor()
+def write_to_redshift(df, redshift_table, redshift_connection):
+    """ Append DataFrame data into Redshift """
     
-    for entry in data:
-        columns = ', '.join(entry.keys())
-        values = ', '.join([f"'{v}'" for v in entry.values()])
-        
-        insert_query = f"INSERT INTO {redshift_table} ({columns}) VALUES ({values})"
-        
-        try:
-            cursor.execute(insert_query)
-            conn.commit()
-        except Exception as e:
-            print(f"Error inserting data into Redshift: {e}")
-            conn.rollback()
+    # Create SQLAlchemy engine for Redshift
+    engine = create_engine(f'postgresql+psycopg2://{redshift_connection}')
     
-    cursor.close()
-    conn.close()
+    try:
+        # Append DataFrame to Redshift using pandas to_sql method with if_exists='append'
+        df.to_sql(redshift_table, con=engine, index=False, if_exists='append', method='multi')
+        print(f"Data successfully inserted into {redshift_table}")
+    except Exception as e:
+        print(f"Error inserting data into Redshift: {e}")

@@ -1,4 +1,5 @@
 import json
+import pandas as pd
 from datetime import datetime
 
 def validate_json(json_data):
@@ -45,7 +46,7 @@ def transform_tasks_data(data):
                     "time": task_entry.get("time")
                 }
                 tasks.append(entry)
-    return tasks
+    return pd.DataFrame(tasks)
 
 # 2. Keyword Info Table
 # Purpose: To store information related to individual keywords.
@@ -101,7 +102,7 @@ def transform_keyword_info(data):
                                     "year_month": year_month,  # Combined column for year and month
                                 })
 
-    return keyword_info
+    return pd.DataFrame(keyword_info)
 
 
 # 3. Monthly Search Volume Table
@@ -146,7 +147,7 @@ def transform_monthly_search_volume(data):
                             # Append to the result list
                             monthly_search_volume_data.append(entry)
 
-    return monthly_search_volume_data
+    return pd.DataFrame(monthly_search_volume_data)
 
 
 # 4. Impressions Table
@@ -198,4 +199,4 @@ def transform_impressions_data(data):
                     }
                     impressions_data.append(entry)
 
-    return impressions_data
+    return pd.DataFrame(impressions_data) 

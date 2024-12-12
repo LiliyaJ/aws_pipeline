@@ -1,10 +1,7 @@
 import os
 import json
-from transformation_helper import validate_json
-from transformation_helper import transform_tasks_data
-from transformation_helper import transform_keyword_info
-from transformation_helper import transform_monthly_search_volume
-from transformation_helper import transform_impressions_data
+from transformation_helper import validate_json, transform_tasks_data, transform_keyword_info, transform_monthly_search_volume, transform_impressions_data
+
 
 # Read the JSON from file
 file_path = 'data/test_json.json'  # Replace with your actual file path
@@ -26,4 +23,5 @@ data = json.loads(file_content)
 # print(f'TASK DATA: {task_data}')
 
 keywords_data = transform_impressions_data(data)
-print(json.dumps(keywords_data, indent=4))
+#print(json.dumps(keywords_data, indent=4))
+print(keywords_data)
