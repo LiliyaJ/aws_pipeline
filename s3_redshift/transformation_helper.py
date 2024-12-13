@@ -64,9 +64,13 @@ def transform_keyword_info(data):
             language_name = task.get("data", {}).get("language_name")
             result_items = task.get("result", [])
             
+            # Ensure result_items is always a list, even if it's None
+            if result_items is None:
+                result_items = []
+
             # Iterate through the result items
             for result_item in result_items:
-                for item in result_item.get("items", []):
+                for item in result_item.get("items", []):  # Ensure items is always a list
                     keyword = item.get("keyword")
                     search_volume = item.get("keyword_info", {}).get("search_volume")
                     compettiton = item.get("keyword_info", {}).get("competition")
@@ -103,7 +107,6 @@ def transform_keyword_info(data):
 
     return pd.DataFrame(keyword_info)
 
-
 # 3. Monthly Search Volume Table
 #Purpose: To track search volume trends over time for each keyword.
 
@@ -117,8 +120,13 @@ def transform_monthly_search_volume(data):
             task_id = task.get("id", None)
             location_name = task.get("data", {}).get("location_name")
             language_name = task.get("data", {}).get("language_name")
-            results = task.get("result", [])
-            for result in results:
+            result_items = task.get("result", [])
+
+            # Ensure result_items is always a list, even if it's None
+            if result_items is None:
+                result_items = []
+
+            for result in result_items:
                 # Extract keywords and their monthly search data
                 for item in result.get("items", []):
                     keyword = item.get("keyword", None)
@@ -162,9 +170,13 @@ def transform_impressions_data(data):
             task_id = task.get("id", None)
             location_name = task.get("data", {}).get("location_name")
             language_name = task.get("data", {}).get("language_name")
-            results = task.get("result", [])
-            
-            for result in results:
+            result_items = task.get("result", [])
+
+             # Ensure result_items is always a list, even if it's None
+            if result_items is None:
+                result_items = []
+
+            for result in result_items:
                 # Extract impressions data
                 for item in result.get("items", []):
                     keyword = item.get("keyword")
