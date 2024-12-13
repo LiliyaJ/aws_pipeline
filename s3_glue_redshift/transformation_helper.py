@@ -20,7 +20,6 @@ def validate_json(json_data):
         print(f"Invalid JSON format: {e}")
         return False
 
-
 # 1. Tasks Table
 # Purpose: To store task-level information.
 
