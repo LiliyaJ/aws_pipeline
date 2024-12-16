@@ -1,5 +1,4 @@
 import boto3
-import sys
 import json
 import pandas as pd
 from datetime import datetime, timedelta

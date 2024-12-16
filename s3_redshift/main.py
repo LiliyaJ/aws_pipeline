@@ -1,5 +1,4 @@
 import boto3
-import sys
 import json
 import pandas as pd
 from datetime import datetime, timedelta
@@ -9,7 +8,7 @@ import os  # To access environment variables
 from transformation_helper import transform_tasks_data, transform_keyword_info, transform_monthly_search_volume, transform_impressions_data, validate_json
 from load_helper import write_to_redshift
 
-def main():
+def lambda_handler(event, context):
     # Initialize S3 client
     s3_client = boto3.client('s3')
     
@@ -32,7 +31,7 @@ def main():
     redshift_password = os.environ['REDSHIFT_PASSWORD']
 
     # Construct Redshift connection string
-    redshift_connection = f"{redshift_username}:{redshift_password}@{redshift_host}:{redshift_port}/{redshift_dbname}"
+    redshift_connection = f"{redshift_username}:{redshift_password}@{redshift_host}"
 
     # Loop over the S3 files
     for obj in response.get('Contents', []):
@@ -58,3 +57,7 @@ def main():
                 write_to_redshift(monthly_search_volume_df, 'monthly_search_volume_table', redshift_connection)
                 write_to_redshift(impressions_df, 'impressions_table', redshift_connection)
 
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Data processed successfully')
+    }
