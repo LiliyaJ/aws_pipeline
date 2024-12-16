@@ -172,7 +172,7 @@ def transform_impressions_data(data):
             language_name = task.get("data", {}).get("language_name")
             result_items = task.get("result", [])
 
-             # Ensure result_items is always a list, even if it's None
+            # Ensure result_items is always a list, even if it's None
             if result_items is None:
                 result_items = []
 
@@ -180,8 +180,9 @@ def transform_impressions_data(data):
                 # Extract impressions data
                 for item in result.get("items", []):
                     keyword = item.get("keyword")
-                    impressions_info = item.get("impressions_info", {})
-                    last_updated_time = impressions_info.get("last_updated_time").split(' ')[0]
+                    # Use `or {}` to handle None for impressions_info
+                    impressions_info = item.get("impressions_info") or {}
+                    last_updated_time = impressions_info.get("last_updated_time", "").split(' ')[0] if impressions_info.get("last_updated_time") else None
                     
                     # Prepare an entry for each keyword and its impressions
                     entry = {
@@ -210,4 +211,4 @@ def transform_impressions_data(data):
                     }
                     impressions_data.append(entry)
 
-    return pd.DataFrame(impressions_data) 
+    return pd.DataFrame(impressions_data)
