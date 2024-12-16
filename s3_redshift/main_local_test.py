@@ -33,11 +33,14 @@ def main():
     redshift_password = os.environ['REDSHIFT_PASSWORD']
 
     # Construct Redshift connection string
-    redshift_connection = f"{redshift_username}:{redshift_password}@{redshift_host}:{redshift_port}/{redshift_dbname}"
+    redshift_connection = f"{redshift_username}:{redshift_password}@{redshift_host}"
+    print(redshift_connection)
+    #:{redshift_port}/{redshift_dbname}
 
     # Loop over the S3 files
     for obj in response.get('Contents', []):
         file_key = obj['Key']
+        print(file_key)
         file_date_str = file_key.split('_')[3]  # Extract date from filename, adjust split if needed
 
         if file_date_str >= one_week_ago_str:
