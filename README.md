@@ -66,3 +66,5 @@ Task ID
 Error Code
 Error Message
 Timestamp
+
+Lambda function for taking json data from s3, transform, normalize and save to Redhsift.
