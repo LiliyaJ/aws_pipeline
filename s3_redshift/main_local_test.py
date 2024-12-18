@@ -19,15 +19,12 @@ def main():
     # Set the date range for files older than one week
     one_week_ago = datetime.now() - timedelta(weeks=1)
     one_week_ago_str = one_week_ago.strftime('%Y-%m-%d')
-    print(one_week_ago_str)
 
     # List all files in the S3 bucket with the specified prefix
     response = s3_client.list_objects_v2(Bucket=s3_bucket, Prefix=s3_prefix)
 
     # Read Redshift credentials from environment variables
     redshift_host = os.environ['REDSHIFT_HOST']
-    redshift_port = os.environ['REDSHIFT_PORT']
-    redshift_dbname = os.environ['REDSHIFT_DBNAME']
     redshift_username = os.environ['REDSHIFT_USERNAME']
     redshift_password = os.environ['REDSHIFT_PASSWORD']
 
@@ -70,8 +67,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-# with open('/Users/liliyajeromin/Documents/GitHubProjects/aws_pipeline/data/test_json.json') as f:
-#     data = json.load(f)  # Use json.load() to read the data
-
-# formatted_data = json.dumps(data, indent=4)
-# print(formatted_data)

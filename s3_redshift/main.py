@@ -1,6 +1,5 @@
 import boto3
 import json
-import pandas as pd
 from datetime import datetime, timedelta
 import os  # To access environment variables
 
@@ -17,7 +16,7 @@ def lambda_handler(event, context):
     s3_prefix = ""  # No subfolder, so prefix is empty
     
     # Set the date range for files older than one week
-    one_week_ago = datetime.now() - timedelta(weeks=1)
+    one_week_ago = datetime.now() - timedelta(weeks=2)
     one_week_ago_str = one_week_ago.strftime('%Y-%m-%d')
 
     # List all files in the S3 bucket with the specified prefix
@@ -25,8 +24,6 @@ def lambda_handler(event, context):
 
     # Read Redshift credentials from environment variables
     redshift_host = os.environ['REDSHIFT_HOST']
-    redshift_port = os.environ['REDSHIFT_PORT']
-    redshift_dbname = os.environ['REDSHIFT_DBNAME']
     redshift_username = os.environ['REDSHIFT_USERNAME']
     redshift_password = os.environ['REDSHIFT_PASSWORD']
 
@@ -46,10 +43,10 @@ def lambda_handler(event, context):
             # Validate JSON
             if validate_json(json_data):
                 # Transform the data
-                tasks_df = pd.DataFrame(transform_tasks_data(json_data))
-                keyword_info_df = pd.DataFrame(transform_keyword_info(json_data))
-                monthly_search_volume_df = pd.DataFrame(transform_monthly_search_volume(json_data))
-                impressions_df = pd.DataFrame(transform_impressions_data(json_data))
+                tasks_df = transform_tasks_data(json_data)
+                keyword_info_df = transform_keyword_info(json_data)
+                monthly_search_volume_df = transform_monthly_search_volume(json_data)
+                impressions_df = transform_impressions_data(json_data)
 
                 # Write to Redshift
                 write_to_redshift(tasks_df, 'tasks_table', redshift_connection)
