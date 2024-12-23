@@ -6,7 +6,7 @@ import os  # To access environment variables
 
 # Assuming you still have your transformation and load functions
 from transformation_helper import transform_tasks_data, transform_keyword_info, transform_monthly_search_volume, transform_impressions_data, validate_json
-from load_helper import save_to_s3 
+from load_helper import save_to_s3  # Import the save_to_s3 function
 
 def main():
     # Initialize S3 client
@@ -26,7 +26,7 @@ def main():
         print(f"Processing file: {file_key}")
         
         # Extract date from the filename (adjust split if necessary)
-        file_date_str = file_key.split('_')[3]  
+        file_date_str = file_key.split('_')[3]  # Adjust this part if your file naming convention differs
 
         # Read the JSON file from S3
         file_obj = s3_client.get_object(Bucket=input_s3_bucket, Key=file_key)
@@ -34,7 +34,7 @@ def main():
         
         # Validate JSON
         if validate_json(json_data):
-            # Perform transformations
+            # Perform transformations and assign each to a variable
             tasks_df = transform_tasks_data(json_data)
             print(f"Transformed tasks data: {tasks_df.head()}")
             
@@ -47,11 +47,11 @@ def main():
             impressions_df = transform_impressions_data(json_data)
             print(f"Transformed impressions data: {impressions_df.head()}")
             
-            # Save each DataFrame as a CSV to S3
-            tasks_csv_key = f"tasks_{file_key.split('/')[-1].replace('.json', '.csv')}"
-            keyword_info_csv_key = f"keyword_info_{file_key.split('/')[-1].replace('.json', '.csv')}"
-            monthly_search_volume_csv_key = f"monthly_search_volume_{file_key.split('/')[-1].replace('.json', '.csv')}"
-            impressions_csv_key = f"impressions_{file_key.split('/')[-1].replace('.json', '.csv')}"
+            # Dynamically create CSV file names using the function names
+            tasks_csv_key = f"tasks_{file_key.split('/')[-1].replace('.json', '_transform_tasks_data.csv')}"
+            keyword_info_csv_key = f"keyword_info_{file_key.split('/')[-1].replace('.json', '_transform_keyword_info.csv')}"
+            monthly_search_volume_csv_key = f"monthly_search_volume_{file_key.split('/')[-1].replace('.json', '_transform_monthly_search_volume.csv')}"
+            impressions_csv_key = f"impressions_{file_key.split('/')[-1].replace('.json', '_transform_impressions_data.csv')}"
 
             # Save each DataFrame as a CSV in the output S3 bucket
             save_to_s3(tasks_df, output_s3_bucket, tasks_csv_key)
